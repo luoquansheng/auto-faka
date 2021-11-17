@@ -1,6 +1,19 @@
 # 端口
 server:
   port: 8085
+  # undertow 配置
+  undertow:
+    # HTTP post内容的最大大小。当值为-1时，默认值为大小是无限的
+    max-http-post-size: -1
+    # 以下的配置会影响buffer,这些buffer会用于服务器连接的IO操作,有点类似netty的池化内存管理
+    # 每块buffer的空间大小,越小的空间被利用越充分
+    buffer-size: 512
+    # 设置IO线程数, 它主要执行非阻塞的任务,它们会负责多个连接, 默认设置每个CPU核心一个线程
+    io-threads: 8
+    # 阻塞任务线程池, 当执行类似servlet请求阻塞操作, undertow会从这个线程池中取得线程,它的值设置取决于系统的负载
+    worker-threads: 256
+    # 是否分配的直接内存
+    direct-buffers: true
 
 # 多环境配置
 spring:
@@ -10,27 +23,45 @@ spring:
   # 连接池配置
   datasource:
     druid:
-      initial-size: 5
-      min-idle: 5
-      max-active: 20
-      max-wait: 30000
-      time-between-eviction-runs-millis: 60000
-      min-evictable-idle-time-millis: 300000
-      test-while-idle: true
-      test-on-borrow: true
-      test-on-return: false
-      remove-abandoned: true
-      remove-abandoned-timeout: 1800
-      #pool-prepared-statements: false
-      #max-pool-prepared-statement-per-connection-size: 20
-      filters: stat,wall
-      validation-query: SELECT 'x'
-      aop-patterns: cn.zlianpay.*.*.service.*
-      stat-view-servlet:
+      # 初始连接数
+      initialSize: 5
+      # 最小连接池数量
+      minIdle: 10
+      # 最大连接池数量
+      maxActive: 20
+      # 配置获取连接等待超时的时间
+      maxWait: 60000
+      # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      timeBetweenEvictionRunsMillis: 60000
+      # 配置一个连接在池中最小生存的时间，单位是毫秒
+      minEvictableIdleTimeMillis: 300000
+      # 配置一个连接在池中最大生存的时间，单位是毫秒
+      maxEvictableIdleTimeMillis: 900000
+      # 配置检测连接是否有效
+      validationQuery: SELECT 1 FROM DUAL
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      webStatFilter:
+        enabled: true
+      statViewServlet:
+        enabled: true
+        # 设置白名单，不填则允许所有访问
+        allow:
         url-pattern: /druid/*
-        reset-enable: true
-        login-username:
-        login-password:
+        # 控制台管理用户名和密码
+        login-username: druid
+        login-password: druid
+      filter:
+        stat:
+          enabled: true
+          # 慢SQL记录
+          log-slow-sql: true
+          slow-sql-millis: 1000
+          merge-sql: true
+        wall:
+          config:
+            multi-statement-allow: true
 
   # json时间格式设置
   jackson:
@@ -45,9 +76,15 @@ spring:
   # 邮件服务器配置
   mail:
     host: smtp.qq.com
-    username: xxxxxx@xxx.com
-    password: xxxxxxxx
+    # #邮箱用户名
+    username: 7398694@qq.com
+    # #邮箱密码（注意：qq邮箱应该使用独立密码，去qq邮箱设置里面获取）
+    password: dcvdzbvfxjnebhda
+    # #编码格式
     default-encoding: UTF-8
+    # #发送邮件地址
+    fromMail:
+      sender: 7398694@qq.com
     properties:
       mail:
         smtp:
@@ -79,6 +116,7 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
     cache-enabled: false
+    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 ## 0是 redisTokenStore ，1是 jdbcTokenStore ，默认是0
 jwtp:

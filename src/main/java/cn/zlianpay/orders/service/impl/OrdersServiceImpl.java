@@ -177,7 +177,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orders.setEmail(contact);
         }
 
-        orders.setMember("TUD" + DateUtil.subData() + StringUtil.getRandomString(6));
+        orders.setMember("TUD" + DateUtil.subData() + StringUtil.getRandomNumber(6));
         orders.setCreateTime(new Date());
 
         UserAgentGetter agentGetter = new UserAgentGetter(request);

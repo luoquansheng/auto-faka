@@ -30,7 +30,8 @@ public class YunGouosConfig {
             /**
              * 扫码支付 返回二维码连接
              */
-            result = WxPay.nativePay(ordersMember, price, mchId, goodsName, "1", goodsDescription, notifyUrl, null, null, null, null, key);
+            //result = WxPay.nativePay(ordersMember, price, mchId, goodsName, "1", goodsDescription, notifyUrl, null, null, null, null, key);
+            result = WxPay.nativePay(ordersMember, price, mchId, goodsName, "1", goodsDescription, notifyUrl, "", "", "", "", null,key);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -59,7 +60,8 @@ public class YunGouosConfig {
             /**
              * 扫码支付 返回二维码连接
              */
-            result = AliPay.nativePay(ordersMember, price, mchId, goodsName, "1", goodsDescription, notifyUrl, key);
+            //result = AliPay.nativePay(ordersMember, price, mchId, goodsName, "1", goodsDescription, notifyUrl, key);
+            result = AliPay.nativePay(ordersMember,price,mchId,goodsName,"1", goodsDescription, notifyUrl, "", "", "", null, key);
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -131,6 +131,7 @@
                 id: data.value
             }, function (res) {
                 if (0 === res.code) {
+                    window.sessionStorage.clear();
                     var list = res.data;
                     var goodsid = document.getElementById("productId");
                     for (const listElement of list) {
@@ -138,6 +139,7 @@
                         option.setAttribute("value", listElement.id);
                         option.innerText = listElement.name;
                         goodsid.appendChild(option);
+                        window.sessionStorage.setItem(listElement.id,listElement.sellType);
                     }
                     form.render("select")
                     layer.msg(res.msg, {icon: 1});
@@ -145,6 +147,36 @@
                     layer.msg(res.msg, {icon: 2, anim: 6});
                 }
             });
+        });
+
+        /* 获取选中的商品ID */
+        form.on('select(productId)', function (data) {
+            var options=$("#productId option:selected"); //获取选中的项
+            var sellType = window.sessionStorage.getItem(options.val());
+            // 使用
+            if (sellType == 1) {
+                $("input[name=sellType][value=0]").prop("checked","false");
+                $("input[name=sellType][value=1]").prop("checked","true");
+                $("#enableInput").html(
+                    '<input name="cardInfo" placeholder="请输入单个卡密" class="layui-input" lay-verify="required" required/>'
+                );
+                $("#sellNumber").attr("style", "display:block;");
+                $("#enabledRepeat").attr("style", "display:none;")
+                $("#inputNumber").html('<input name="sellNumber" placeholder="输入要销售的次数..." value="0" class="layui-input" lay-verType="tips"/>');
+            } else {  // 不使用
+                $("input[name=sellType][value=1]").prop("checked","false");
+                $("input[name=sellType][value=0]").prop("checked","true");
+                $("#enableInput").html(
+                    '<textarea name="cardInfo" lay-verify="required" placeholder="卡号+空格+密码，一行一张卡\n' +
+                    '如：ABCDEFG 123456\n' +
+                    '(卡密长度不得超过200位)\n' +
+                    '(建议每次添加不超过2000张)" class="layui-textarea" style="min-height: 222px; height: 222px;"></textarea>'
+                );
+                $("#sellNumber").attr("style", "display:none;");
+                $("#enabledRepeat").attr("style", "display:block;")
+                $("#inputNumber").html(null);
+            }
+            form.render(); //更新全部
         });
 
     });

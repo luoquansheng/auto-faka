@@ -14,11 +14,9 @@ public class Constants {
     public static String UPLOAD_DIR = "";  // 上传的目录
 
     static {
-        try {
-            UPLOAD_DIR = ResourceUtils.getURL("classpath:").getPath() + "/static/upload/";
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        //UPLOAD_DIR = ResourceUtils.getURL("classpath:").getPath() + "/static/upload/";
+        String projectPath = System.getProperty("user.dir");
+        UPLOAD_DIR = projectPath + "/target/static/upload/";
     }
 
     public static final boolean UPLOAD_UUID_NAME = false;  // 文件上传是否用uuid命名

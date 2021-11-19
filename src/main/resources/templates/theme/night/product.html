@@ -476,7 +476,9 @@
         let orderNumber = 1;
         let numDoc = $("#orderNumber");
         $('.sub').click(function () {
-            if (orderNumber <= 1) return layer.msg('购买数量不能低于1件');
+            if (orderNumber <= 1) return layer.msg('购买数量不能低于1件',{
+                time: 800 //800毫秒关闭（如果不配置，默认是3秒
+            });
             orderNumber--;
 
             if (product1.isWholesale == 1) {
@@ -501,7 +503,9 @@
         })
         $('.add').click(function () {
             if (orderNumber >= product1.cardsCount) {
-                return layer.msg('购买数量不能多于库存数量');
+                return layer.msg('购买数量不能多于库存数量',{
+                    time: 800 //800毫秒关闭（如果不配置，默认是3秒
+                });
             }
             orderNumber++;
             if (product1.isWholesale == 1) {
@@ -530,16 +534,20 @@
             val = zhzs(val+"");
             $(this).val(val);  // 回复input输入框
             if (val <= 0) {
-                $(this).val(1);
-                orderNumber = 1;
+                $(this).val(0);
+                orderNumber = 0;
                 finalAmount(orderNumber);
-                return layer.msg('购买数量不能低于1件');
+                return layer.msg('购买数量不能低于1件',{
+                    time: 800 //800毫秒关闭（如果不配置，默认是3秒
+                });
             }
             if (val > product1.cardsCount) {
                 $(this).val(product1.cardsCount);
                 orderNumber = product1.cardsCount;
                 finalAmount(orderNumber);
-                return layer.msg('购买数量不能多于库存数量');
+                return layer.msg('购买数量不能多于库存数量',{
+                    time: 800 //800毫秒关闭（如果不配置，默认是3秒
+                });
             }
             orderNumber = val;
             finalAmount(orderNumber);
@@ -652,7 +660,7 @@
             if (value != '')
                 value = parseInt(value);
             else
-                value = parseInt(1);
+                value = parseInt(0);
             return value;
         }
 

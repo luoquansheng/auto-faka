@@ -98,7 +98,7 @@ public class ProductsController extends BaseController {
             productsVo.setSellCardMember(sellCount);
 
             if (products.getSellType() == 1) {
-                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()));
+                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("sell_type",1));
                 if (!ObjectUtils.isEmpty(cards)) {
                     productsVo.setCardMember(cards.getNumber());
                     productsVo.setSellCardMember(cards.getSellNumber());

@@ -462,7 +462,13 @@ public class OrderController extends BaseController {
              */
             if (products.getSellType() == 0) { // 一次性卡密类型
 
-                List<Cards> card = cardsService.getCard(0, products.getId(), member.getNumber());
+                // List<Cards> card = cardsService.getCard(0, products.getId(), member.getNumber());
+                List<Cards> card = cardsService.getBaseMapper().selectList(new QueryWrapper<Cards>()
+                        .eq("status",0)
+                        .eq("product_id",products.getId())
+                        .eq("sell_type",0)
+                        .orderBy(true,false,"rand()")
+                        .last("LIMIT "+member.getNumber()+""));
                 if (card == null) return false; // 空值的话直接返回错误提示
 
                 StringBuilder orderInfo = new StringBuilder(); // 订单关联的卡密信息
@@ -504,7 +510,7 @@ public class OrderController extends BaseController {
             } else if (products.getSellType() == 1) { // 重复销售的卡密
                 StringBuilder orderInfo = new StringBuilder(); // 订单关联的卡密信息
 
-                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 0));
+                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 0).eq("sell_type",1));
                 if (cards == null) return false; // 空值的话直接返回错误提示
 
                 /**

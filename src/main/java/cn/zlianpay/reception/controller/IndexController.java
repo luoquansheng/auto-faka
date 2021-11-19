@@ -680,7 +680,7 @@ public class IndexController {
             }
 
             if (products.getSellType() == 1) {
-                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()));
+                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("sell_type",1));
                 if (ObjectUtils.isEmpty(cards)) { // kon
                     productDTO.setCardMember(0);
                     productDTO.setSellCardMember(0);

@@ -578,6 +578,8 @@
 
         // 立即支付
         $('#btnPay').click(function () {
+            if(orderNumber === 0)
+                return layer.msg('购买数量不能低于1件',{time: 800});
             doPay();
         });
 

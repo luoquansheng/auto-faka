@@ -1,13 +1,19 @@
 package cn.zlianpay;
 
+import cn.zlianpay.carmi.entity.Cards;
+import cn.zlianpay.carmi.service.CardsService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.zjiecode.wxpusher.client.WxPusher;
 import com.zjiecode.wxpusher.client.bean.Message;
 import com.zjiecode.wxpusher.client.bean.MessageResult;
 import com.zjiecode.wxpusher.client.bean.Result;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +22,9 @@ import java.util.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class ZlianWebApplicationTests {
+
+    @Autowired
+    private CardsService cardsService;
 
     @Test
     public void contextLoads() throws IOException {
@@ -38,6 +47,37 @@ public class ZlianWebApplicationTests {
         Result<List<MessageResult>> result = WxPusher.send(message);
         System.out.println(result.getData().get(0).isSuccess());
         //endregion
+    }
+
+    @Test
+    public void selectCard(){
+        String pid = 8+"";
+        int mun = 1;
+        List<Cards> card = cardsService.getBaseMapper().selectList(new QueryWrapper<Cards>()
+                .eq("status",0)
+                .eq("product_id",pid)
+                .eq("sell_type",0)
+                .orderBy(true,false,"rand()")
+                .last("LIMIT "+mun+""));
+
+        System.out.println(card);
+    }
+
+
+    @Autowired
+    private JedisPool jedisPool;
+    @Test
+    public void jredis_set(){
+        Jedis jedis = jedisPool.getResource();
+        // 添加数据到 set
+        jedis.sadd("ip_blacklist",333333+"");
+        // 获取set
+        Set<String> res = jedis.smembers("ip_blacklist");
+        System.out.println(res);
+        // 判断set 集合中是否存在
+        System.out.println(jedis.sismember("ip_blacklist","333333"));
+        // 删除set 集合的某个元素
+        jedis.srem("ip_blacklist","333333");
     }
 
 }

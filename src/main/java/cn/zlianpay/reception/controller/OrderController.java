@@ -3,6 +3,7 @@ package cn.zlianpay.reception.controller;
 import cn.zlianpay.carmi.entity.Cards;
 import cn.zlianpay.carmi.service.CardsService;
 import cn.zlianpay.common.core.Constants;
+import cn.zlianpay.common.core.annotation.SameUrlData;
 import cn.zlianpay.common.core.pays.alipay.SendAlipay;
 import cn.zlianpay.common.core.pays.jiepay.JiepaySend;
 import cn.zlianpay.common.core.pays.payjs.sendPayjs;
@@ -100,6 +101,7 @@ public class OrderController extends BaseController {
     /**
      * 添加
      */
+    @SameUrlData
     @ResponseBody
     @RequestMapping("/buy")
     public JsonResult save(HttpServletResponse response, HttpServletRequest request) {

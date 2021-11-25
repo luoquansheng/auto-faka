@@ -2,6 +2,8 @@ package cn.zlianpay.reception.controller;
 
 import cn.zlianpay.carmi.entity.Cards;
 import cn.zlianpay.carmi.service.CardsService;
+import cn.zlianpay.common.core.annotation.RateLimit;
+import cn.zlianpay.common.core.annotation.SameUrlData;
 import cn.zlianpay.common.core.enmu.Alipay;
 import cn.zlianpay.common.core.enmu.Paypal;
 import cn.zlianpay.common.core.enmu.QQPay;
@@ -65,7 +67,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static cn.zlianpay.dashboard.DashboardController.getOrderList;
-
+@RateLimit
 @Controller
 public class IndexController {
 

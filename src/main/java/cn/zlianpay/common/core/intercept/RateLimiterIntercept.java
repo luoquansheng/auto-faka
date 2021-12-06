@@ -21,7 +21,6 @@ import java.util.Objects;
 public class RateLimiterIntercept implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        System.out.println("+==================================");
         if (handler instanceof HandlerMethod){
             HandlerMethod handlerMethod=(HandlerMethod)handler;
             Method method = handlerMethod.getMethod();

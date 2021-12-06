@@ -19,6 +19,9 @@ server:
 spring:
   profiles:
     active: dev
+  http:
+    multipart:
+      location: /data/upload_tmp
 
   # 连接池配置
   datasource:

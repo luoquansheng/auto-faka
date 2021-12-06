@@ -570,7 +570,36 @@
         $('#btnPay').click(function () {
             if(orderNumber === 0)
                 return layer.msg('购买数量不能低于1件',{time: 800});
-            doPay();
+            //示范一个公告层
+            layer.open({
+                type: 1,
+                title: '领取红包',
+                closeBtn: false,
+                area: '300px;',
+                shade: 0.4,
+                id: 'LAY_layuipro',
+                btn: ['我知道啦'],
+                btnAlign: 'c',
+                moveType: 1,
+                content: '<div style="padding: 20px; font-size: 16px; font-family: Content-font, Roboto, sans-serif; font-weight: 400;">' +
+                    '<div class="index-module_textWrap_3ygOc">' +
+                    '<p>' +
+                    '<span class="bjh-p">' +
+                    '<img src="../file/20211206/a57dbd4c26c0fdb66fad0eb4b8a5bc8a.png" alt="支付宝扫码领取本店红包" width="260" height="393" />' +
+                    '</span>' +
+                    '</p>' +
+                    '</div>' +
+                    '</div>',
+                success: function (layero) {
+                    var btn = layero.find('.layui-layer-btn');
+                    btn.click(function () {
+                        /*var date = new Date();
+                        date.setTime(date.getTime() + (5 * 1000));
+                        $.cookie('isWindow', 'yes', {expires: 1});*/
+                        doPay();
+                    })
+                }
+            });
         });
 
         $.post('/getProductById', {

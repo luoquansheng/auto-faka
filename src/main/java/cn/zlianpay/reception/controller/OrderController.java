@@ -586,6 +586,9 @@ public class OrderController extends BaseController {
                         Map<String, Object> map = new HashMap<>();  // 页面的动态数据
                         map.put("title", website.getWebsiteName());
                         map.put("member", member.getMember());
+                        map.put("money",member.getMoney());
+                        map.put("number",member.getNumber());
+                        map.put("productName",products.getName());
                         map.put("date", DateUtil.getDate());
                         map.put("info", stringBuilder.toString());
                         try {

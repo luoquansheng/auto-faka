@@ -26,6 +26,14 @@
             font-size: 18px;
             color: #c8c8c8;
         }
+
+        .layui-table th:first-child, .layui-table td:first-child {
+            text-align: left;
+        }
+        .layui-table th,.layui-table td {
+            text-align: center;
+        }
+
     </style>
 </head>
 <body class="page-no-scroll">
@@ -49,9 +57,9 @@
                         <:for items="${carouselList}" var="item">
                             <div class="swiper-slide">
                                 <a href="${item.link}" style="height: 100%; background-image: url(<:if test="${item.imageLogo == null || item.imageLogo == ''}">../theme/default/images/carousel_logo.png</:if><:if test="${item.imageLogo != null || item.imageLogo != ''}">${item.imageLogo!}</:if>);">
-                                    <div class="swiper-text">
-                                        <h2>${item.title}</h2>
-                                    </div>
+                                <div class="swiper-text">
+                                    <h2>${item.title}</h2>
+                                </div>
                                 </a>
                             </div>
                         </:for>
@@ -98,17 +106,45 @@
             选择分类
             <div class="pull-right" style="position: relative;">
                 <i class="layui-icon layui-icon-search layui-icon-screen-show"></i>
-                <input id="screen-product" placeholder="请输入商品名称" class="layui-input screen-input" lay-verify="required"
-                       required/>
+                <input id="screen-product" placeholder="请输入商品名称" class="layui-input screen-input" lay-verify="required" required/>
             </div>
         </div>
         <div class="layui-card-body" style="padding: 15px 15px;">
             <div class="layui-row layui-col-space15 classify-type" id="classifyList">
             </div>
         </div>
+
     </div>
     <div class="layui-row layui-col-space15" id="goodsList">
     </div>
+    <table class="layui-table" lay-skin="line" id="table-goodsList_1">
+        <colgroup>
+            <col width="45%">
+            <col width="8%" class="layui-hide-xs">
+            <col width="14%">
+            <col width="10%" class="layui-hide-xs">
+            <col width="15%" class="layui-hide-xs">
+            <col width="8%">
+        </colgroup>
+        <thead>
+        <tr>
+            <th>商品名称</th>
+            <th class="layui-hide-xs">发货模式</th>
+            <th>价格</th>
+            <th class="layui-hide-xs">库存</th>
+            <th class="layui-hide-xs">备注</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="goodsList_1">
+
+        </tbody>
+    </table>
+</div>
+<div class="layer-footer" style="z-index: 10; position: fixed; text-align: right; margin-left: -10%; bottom: 0; width:100%; height:50px">
+    <!--<button style="height: 40px;width: 60px" type="button" class="layui-btn layui-btn-sm layui-btn-primary" lay-submit=""  lay-filter="formDemo">通过</button>
+    <button style="height: 40px;width: 60px" type="button" class="layui-btn layui-btn-sm layui-btn-primary" lay-submit=""  lay-filter="formDemo">驳回</button>-->
+    <button type="button" id="goodsView" class="layui-btn layui-btn-radius layui-btn-normal" title="点击切换商品列表显或方格显示">切换视图</button>
 </div>
 <!-- footer -->
 <:include file="./common/footer.html" websiteName="${website.websiteName}" beianIcp="${website.beianIcp}"/>
@@ -168,9 +204,38 @@
             {{# if(d.shipType == 1){ }}<span class="el-tag el-tag&#45;&#45;success el-tag&#45;&#45;danger">手动发货</span>{{# } }}
         </div>
         {{# if(d.cardMember == 0){ }}
-            <div class="ribbon-two ribbon-two-danger"><span>售罄</span></div>
+        <div class="ribbon-two ribbon-two-danger"><span>售罄</span></div>
         {{# } }}
     </div>
+</script>
+<!-- 项目模板2 商品列表模式显示 -->
+<script type="text/html" id="productItem_1">
+    <tr>
+        <td>{{d.name}}</td>
+        <td class="layui-hide-xs">
+            {{# if(d.shipType == 0){ }}<span class="el-tag el-tag--light">自动发货</span>{{# } }}
+            {{# if(d.shipType == 1){ }}<span class="el-tag el-tag--success el-tag--danger">手动发货</span>{{# } }}
+        </td>
+        <td><span style="color: #F56C6C; font-size: 15px">{{d.price}}</span></td>
+        <td class="layui-hide-xs">
+            {{# if(d.cardMember == 0){ }}<span style="color: #e70f0f; font-size: 15px">缺货</span>{{# } }}
+            {{# if(d.cardMember > 0){ }}<span>{{d.cardMember}}</span>{{# } }}
+        </td>
+        <td class="layui-hide-xs">
+            <span>
+                {{# if(d.isCoupon >= 1){ }}<span style="color: #67C23A">券</span>{{# } }}
+                {{# if(d.restricts >= 1){ }}<span style="color: #F56C6C">限购</span>{{# } }}
+                {{# if(d.isWholesale === 1){ }}<span style="color: #E6A23C">折扣</span>{{# } }}
+            </span>
+        </td>
+        <td>
+            <a href="${ctxPath}/product/{{d.link}}"
+               style=" border-radius: 4px; right: 0;height: 24px; line-height: 24px;"
+               class="layui-btn layui-btn-xs layui-btn-danger">
+                前往购买
+            </a>
+        </td>
+    </tr>
 </script>
 
 <!-- js部分 -->
@@ -191,6 +256,7 @@
 </script>
 
 <script>
+    var productInfo = '';
     layui.use(['layer', 'form', 'notice', 'dataGrid'], function () {
         var $ = layui.jquery;
         var layer = layui.layer;
@@ -275,11 +341,8 @@
                 var list = res.data;
                 var goodsHtml = '';
                 if (list.length != 0) {
-                    dataGrid.render({
-                        elem: '#goodsList',
-                        templet: '#productItem',
-                        data: list
-                    });
+                    productInfo = list;
+                    rendering(list);
                 } else {
                     goodsHtml = '' +
                         '<div class="no-content">\n' +
@@ -304,11 +367,8 @@
                     var list = res.data;
                     var goodsHtml = '';
                     if (list.length != 0) {
-                        dataGrid.render({
-                            elem: '#goodsList',
-                            templet: '#productItem',
-                            data: list
-                        });
+                        productInfo = list;
+                        rendering(list);
                     } else {
                         goodsHtml = '' +
                             '<div class="no-content">\n' +
@@ -327,7 +387,6 @@
         $(document).ready(function (e) {
             $("#screen-product").keyup(function (e) {
                 var content = $(this).val(); // 获取到搜索框输入的内容
-                console.log(content)
                 $.get('/getProductSearchList', {
                     content: content
                 }, function (res) {
@@ -335,11 +394,7 @@
                         var list = res.data;
                         var goodsHtml = '';
                         if (list.length != 0) {
-                            dataGrid.render({
-                                elem: '#goodsList',
-                                templet: '#productItem',
-                                data: list
-                            });
+                            rendering(list);
                         } else {
                             goodsHtml = '' +
                                 '<div class="no-content">\n' +
@@ -355,6 +410,40 @@
             });
         });
 
+        $('#goodsView').click(function () {
+            let mode = window.localStorage.getItem("viewMode");
+            if(mode == 1){
+                window.localStorage.setItem("viewMode",0);
+                $("#goodsList").css('display', 'block');
+                $("#table-goodsList_1").css('display', 'none');
+            }else {
+                window.localStorage.setItem("viewMode",1);
+                $("#goodsList").css('display', 'none');
+                $("#table-goodsList_1").css('display','');
+            }
+            rendering(productInfo);
+        });
+
+        function rendering(list) {
+            let mode = window.localStorage.getItem("viewMode");
+            if(mode == 1){
+                $("#goodsList").css('display', 'none');
+                $("#table-goodsList_1").css('display','');
+                dataGrid.render({
+                    elem: '#goodsList_1',
+                    templet: '#productItem_1',
+                    data: list
+                });
+            }else{
+                $("#goodsList").css('display', 'block');
+                $("#table-goodsList_1").css('display', 'none');
+                dataGrid.render({
+                    elem: '#goodsList',
+                    templet: '#productItem',
+                    data: list
+                });
+            }
+        }
     });
 </script>
 </body>

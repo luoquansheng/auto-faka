@@ -432,6 +432,9 @@ public class OrdersController extends BaseController {
                         map.put("member", orders.getMember());
                         map.put("date", DateUtil.getDate());
                         map.put("info", shipInfo);
+                        map.put("money",orders.getMoney());
+                        map.put("number",orders.getNumber());
+                        map.put("productName",products.getName());
                         emailService.sendHtmlEmail(website.getWebsiteName() + "发货提醒", "email/sendShip.html", map, new String[]{orders.getEmail()});
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -586,6 +589,9 @@ public class OrdersController extends BaseController {
                         Map<String, Object> map = new HashMap<>();  // 页面的动态数据
                         map.put("title", website.getWebsiteName());
                         map.put("member", member.getMember());
+                        map.put("money",member.getMoney());
+                        map.put("number",member.getNumber());
+                        map.put("productName",products.getName());
                         map.put("date", DateUtil.getDate());
                         map.put("info", stringBuilder.toString());
                         try {

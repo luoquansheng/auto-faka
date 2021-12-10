@@ -80,7 +80,7 @@ public class ProductsController extends BaseController {
     @RequestMapping("/page")
     public PageResult<ProductsVo> page(HttpServletRequest request) {
         PageParam<Products> pageParam = new PageParam<>(request);
-        pageParam.addOrderAsc("sort");
+        pageParam.addOrderAsc("sort").addOrderDesc("id");
 
         List<Products> records = productsService.page(pageParam, pageParam.getWrapper()).getRecords();
         List<ProductsVo> productsVoList = records.stream().map((products) -> {

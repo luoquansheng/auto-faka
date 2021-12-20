@@ -208,6 +208,16 @@ public class OrderController extends BaseController {
                      */
                     return JsonResult.error("该优惠券代码已被使用过，或不能使用在本商品，请核对后再试！");
                 }
+            }else{
+                QueryWrapper<Coupon> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("product_id", goodsId) // 商品id
+                        .eq("coupon", contact) // 优惠券代码
+                        .eq("status", 0); // 没有使用的
+                Coupon coupon1 = couponService.getOne(queryWrapper);
+                if (!ObjectUtils.isEmpty(coupon1)) { // 判断 coupon1 是否不为空
+                    // 拿到优惠券 entity
+                    couponId = coupon1.getId();
+                }
             }
             /**
              * 处理订单业务

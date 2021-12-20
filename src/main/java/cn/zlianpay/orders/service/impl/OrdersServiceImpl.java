@@ -131,7 +131,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 } else {
                     orders.setMoney(multiply);
                 }
-            } else { // 折扣优惠券
+            }
+            if (coupon.getDiscountType() == 1)  { // 折扣优惠券
                 if (multiply.compareTo(coupon.getFullReduction()) > -1) { // 判断实际支付金额是否满足满减的对滴金额
                     // 得到满减后的价格
                     BigDecimal bigDecimal = multiply.subtract(multiply.multiply(toPoint(coupon.getDiscountVal().toString()).setScale(2, BigDecimal.ROUND_HALF_DOWN)))
@@ -141,6 +142,16 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     orders.setMoney(multiply);
                 }
             }
+            if (coupon.getDiscountType() == 2)  { // 商品指定单价券
+                if (multiply.compareTo(coupon.getFullReduction()) > -1) { // 判断实际支付金额是否满足满减的对滴金额
+                    // 得到满减后的价格
+                    orders.setMoney(coupon.getDiscountVal().multiply(new BigDecimal(number)));
+                    //multiply = new BigDecimal(orders.getNumber());
+                } else {
+                    orders.setMoney(multiply);
+                }
+            }
+
 
             Coupon coupon1 = new Coupon();
             coupon1.setId(coupon.getId());

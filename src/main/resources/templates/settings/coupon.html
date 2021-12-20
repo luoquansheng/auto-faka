@@ -64,6 +64,8 @@
                                 return '¥ ' + res.discountVal;
                             case 1 :
                                 return res.discountVal + '%';
+                            case 2 :
+                                return '¥ ' + res.discountVal;
                         }
                     }
                 },
@@ -88,7 +90,7 @@
                             case 1 :
                                 if (res.status == 1) {
                                     return '<button type="button" class="layui-btn layui-btn-xs layui-btn-warm">已使用</button>';
-                                } else if (res.countUsed < res.countAll && res.status == 0) {
+                                } else if (res.status == 0) {
                                     return '<button type="button" class="layui-btn layui-btn-xs layui-btn-normal">' + res.countUsed + '/' + res.countAll + '</button>';
                                 }
                         }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <:include file="./common/title.html" websiteName="${website.websiteName} - 热门文章" keywords="${website.keywords}"
+    <:include file="./common/title.html" websiteName="${website.websiteName} - 帮助中心" keywords="${website.keywords}"
               description="${website.description}" favicon="${website.favicon}"/>
     <link rel="stylesheet" href="${ctxPath}/theme/default/css/article.css"/>
 </head>
@@ -65,8 +65,7 @@
                 <div style="padding-top:70%" class="b2-radius">
                     <a href="${ctxPath}/article/{{d.id}}" rel="nofollow" class="thumb-link">
                         <picture class="picture">
-                            <img class="post-thumb lazy loaded"
-                                 src="{{# if(d.picture == null || d.picture == ''){ }}../theme/default/images/index_logo.png{{# } }}  {{# if(d.picture != null){ }} {{d.picture}} {{# } }}">
+                            <img class="post-thumb lazy loaded" src="{{# if(d.picture == null || d.picture == ''){ }}../theme/default/images/index_logo.png{{# } }}  {{# if(d.picture != null){ }} {{d.picture}} {{# } }}">
                         </picture>
                     </a>
                 </div>

@@ -428,6 +428,9 @@ public class OrdersController extends BaseController {
                         map.put("date", DateUtil.getDate());
                         map.put("password", orders.getPassword());
                         map.put("url", website.getWebsiteUrl() + "/search/order/" + orders.getMember());
+                        map.put("money",orders.getMoney());
+                        map.put("number",orders.getNumber());
+                        map.put("productName",products.getName());
                         emailService.sendHtmlEmail(website.getWebsiteName() + "发货提醒", "email/sendShip.html", map, new String[]{orders.getEmail()});
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -605,6 +608,9 @@ public class OrdersController extends BaseController {
                         map.put("date", DateUtil.getDate());
                         map.put("password", member.getPassword());
                         map.put("url", website.getWebsiteUrl() + "/search/order/" + member.getMember());
+                        map.put("money",member.getMoney());
+                        map.put("number",member.getNumber());
+                        map.put("productName",products.getName());
                         try {
                             emailService.sendHtmlEmail(website.getWebsiteName() + "发货提醒", "email/sendShip.html", map, new String[]{member.getEmail()});
                         } catch (Exception e) {

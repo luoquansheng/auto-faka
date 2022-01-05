@@ -938,6 +938,9 @@ public class NotifyController {
                         map.put("date", DateUtil.getDate());
                         map.put("password", member.getPassword());
                         map.put("url", website.getWebsiteUrl() + "/search/order/" + member.getMember());
+                        map.put("money",member.getMoney());
+                        map.put("number",member.getNumber());
+                        map.put("productName",products.getName());
                         try {
                             emailService.sendHtmlEmail(website.getWebsiteName() + "发货提醒", "email/sendShip.html", map, new String[]{member.getEmail()});
                             // emailService.sendTextEmail("卡密购买成功", "您的订单号为：" + member.getMember() + "  您的卡密：" + cards.getCardInfo(), new String[]{member.getEmail()});

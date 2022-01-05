@@ -44,6 +44,8 @@ spring:
         reset-enable: true
         login-username:
         login-password:
+      web-stat-filter:
+        enabled: true
 
   # json时间格式设置
   jackson:

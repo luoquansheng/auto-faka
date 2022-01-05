@@ -112,7 +112,7 @@ public class ExcelWrite {
                 file.mkdirs();
             }
 
-            String fileName = "值联云卡-卡密" + DateUtil.subData() + ".xls";
+            String fileName = "自助购卡-卡密" + DateUtil.subData() + ".xls";
 
             FileOutputStream fileOut = new FileOutputStream(path + fileName);
 

@@ -131,27 +131,14 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 } else {
                     orders.setMoney(multiply);
                 }
-            }
-            if (coupon.getDiscountType() == 1)  { // 折扣优惠券
+            } else { // 折扣优惠券
                 if (multiply.compareTo(coupon.getFullReduction()) > -1) { // 判断实际支付金额是否满足满减的对滴金额
-                    // 得到满减后的价格
-                    BigDecimal bigDecimal = multiply.subtract(multiply.multiply(toPoint(coupon.getDiscountVal().toString()).setScale(2, BigDecimal.ROUND_HALF_DOWN)))
-                            .setScale(2, BigDecimal.ROUND_HALF_DOWN);
+                    BigDecimal bigDecimal = multiply.multiply(toPoint(coupon.getDiscountVal().toString()).setScale(2, BigDecimal.ROUND_HALF_DOWN)).setScale(2, BigDecimal.ROUND_HALF_DOWN);
                     orders.setMoney(bigDecimal);
                 } else {
                     orders.setMoney(multiply);
                 }
             }
-            if (coupon.getDiscountType() == 2)  { // 商品指定单价券
-                if (multiply.compareTo(coupon.getFullReduction()) > -1) { // 判断实际支付金额是否满足满减的对滴金额
-                    // 得到满减后的价格
-                    orders.setMoney(coupon.getDiscountVal().multiply(new BigDecimal(number)));
-                    //multiply = new BigDecimal(orders.getNumber());
-                } else {
-                    orders.setMoney(multiply);
-                }
-            }
-
 
             Coupon coupon1 = new Coupon();
             coupon1.setId(coupon.getId());
@@ -188,7 +175,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orders.setEmail(contact);
         }
 
-        orders.setMember("TUD" + DateUtil.subData() + StringUtil.getRandomNumber(6));
+        orders.setMember("TUD" + DateUtil.subData() + StringUtil.getRandomString(6));
         orders.setCreateTime(new Date());
 
         UserAgentGetter agentGetter = new UserAgentGetter(request);

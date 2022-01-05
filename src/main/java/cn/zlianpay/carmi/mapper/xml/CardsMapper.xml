@@ -50,7 +50,7 @@
     </select>
 
     <select id="getCard" resultType="cn.zlianpay.carmi.entity.Cards">
-        select * from sys_cards WHERE sell_type=0 and status=#{status} and product_id=#{productId} ORDER BY rand() LIMIT #{number}
+        select * from sys_cards WHERE status=#{status} and product_id=#{productId} ORDER BY rand() LIMIT #{number}
     </select>
 
 </mapper>

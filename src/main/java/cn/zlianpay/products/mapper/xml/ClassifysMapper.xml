@@ -28,7 +28,6 @@
 				</if>
             </if>
         </where>
-        ORDER BY a.sort ASC
     </sql>
 
     <!-- 分页查询 -->

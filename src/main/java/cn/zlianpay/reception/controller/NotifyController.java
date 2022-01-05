@@ -5,6 +5,7 @@ import cn.zlianpay.carmi.entity.Cards;
 import cn.zlianpay.carmi.service.CardsService;
 import cn.zlianpay.common.core.pays.payjs.SignUtil;
 import cn.zlianpay.common.core.pays.paypal.PaypalSend;
+import cn.zlianpay.common.core.pays.xunhupay.PayUtils;
 import cn.zlianpay.common.core.pays.zlianpay.ZlianPay;
 import cn.zlianpay.common.core.utils.DateUtil;
 import cn.zlianpay.common.core.utils.FormCheckUtil;
@@ -14,6 +15,7 @@ import cn.zlianpay.settings.entity.ShopSettings;
 import cn.zlianpay.settings.service.ShopSettingsService;
 import cn.zlianpay.website.entity.Website;
 import cn.zlianpay.website.service.WebsiteService;
+import com.aizuda.limiter.annotation.RateLimit;
 import com.alibaba.fastjson.JSON;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
@@ -91,6 +93,7 @@ public class NotifyController {
     private String resFailXml = "<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[报文为空]]></return_msg></xml>";
 
     @RequestMapping("/mqpay/notifyUrl")
+    @RateLimit(key = "#payId", count = 1, interval = "10s", message = "请勿频繁操作")
     @ResponseBody
     public String notifyUrl(HttpServletRequest request) {
         /**
@@ -162,6 +165,7 @@ public class NotifyController {
     }
 
     @RequestMapping("/zlianpay/notifyUrl")
+    @RateLimit(key = "#out_trade_no", count = 1, interval = "10s", message = "请勿频繁操作")
     @ResponseBody
     public String zlianpNotify(HttpServletRequest request) {
         Map<String, String> parameterMap = RequestParamsUtil.getParameterMap(request);
@@ -274,6 +278,7 @@ public class NotifyController {
      * @return
      */
     @ResponseBody
+    @RateLimit(key = "#outTradeNo", count = 1, interval = "10s", message = "等待上一个回调处理完成")
     @RequestMapping("/yungouos/notify")
     public String notify(HttpServletRequest request) throws NoSuchAlgorithmException {
         Map<String, String> params = RequestParamsUtil.getParameterMap(request);
@@ -333,11 +338,30 @@ public class NotifyController {
      * @return
      */
     @RequestMapping("/xunhupay/notifyUrl")
+    @RateLimit(key = "#trade_order_id", count = 1, interval = "10s", message = "等待上一个回调处理完成")
     @ResponseBody
     public String xunhuNotifyUrl(HttpServletRequest request) {
         // 记得 map 第二个泛型是数组 要取 第一个元素 即[0]
         Map<String, String> params = RequestParamsUtil.getParameterMap(request);
-        if ("OD".equals(params.get("status"))) {
+        Map<String, Object> map = new HashMap<>();
+        for (Map.Entry<String, String> stringStringEntry : params.entrySet()) {
+            map.put(stringStringEntry.getKey(), stringStringEntry.getValue());
+        }
+        String hash = params.get("hash");
+        Orders orders = ordersService.getOne(new QueryWrapper<Orders>().eq("member", params.get("trade_order_id")));
+        String key = null;
+        if (orders.getPayType().equals("xunhupay_wxpay")) {
+            Pays xunhuwxPays = paysService.getOne(new QueryWrapper<Pays>().eq("driver", "xunhupay_wxpay"));
+            Map xunhuwxMap = JSON.parseObject(xunhuwxPays.getConfig());
+            key = xunhuwxMap.get("appsecret").toString();
+        } else if (orders.getPayType().equals("xunhupay_alipay")) {
+            Pays xunhualiPays = paysService.getOne(new QueryWrapper<Pays>().eq("driver", "xunhupay_wxpay"));
+            Map xunhualiMap = JSON.parseObject(xunhualiPays.getConfig());
+            key = xunhualiMap.get("appsecret").toString();
+        }
+
+        String sign = PayUtils.createSign(map, key);
+        if (sign.equals(hash) && "OD".equals(params.get("status"))) {
             String returnBig = returnBig(params.get("total_fee"), params.get("total_fee"), params.get("trade_order_id"), params.get("transaction_id"), params.get("plugins"), "success", "fiald");
             return returnBig;
         } else {
@@ -369,6 +393,7 @@ public class NotifyController {
      * @return
      */
     @RequestMapping("/jiepay/notifyUrl")
+    @RateLimit(key = "#order_id", count = 1, interval = "10s", message = "等待上一个回调处理完成")
     @ResponseBody
     public String jiepayNotifyUrl(HttpServletRequest request) {
         // 记得 map 第二个泛型是数组 要取 第一个元素 即[0]
@@ -429,6 +454,7 @@ public class NotifyController {
      * @return
      */
     @RequestMapping("/payjs/notify")
+    @RateLimit(key = "#out_trade_no", count = 1, interval = "10s", message = "等待上一个回调处理完成")
     @ResponseBody
     public Object payjsNotify(NotifyDTO notifyDTO) {
         Map<String, Object> notifyData = new HashMap<>();
@@ -478,6 +504,7 @@ public class NotifyController {
      * @return
      */
     @RequestMapping("/wxpay/notify")
+    @RateLimit(key = "#out_trade_no", count = 1, interval = "10s", message = "等待上一个回调处理完成")
     @ResponseBody
     public String wxPayNotify(HttpServletRequest request, HttpServletResponse response) {
         String resXml = "";
@@ -556,6 +583,7 @@ public class NotifyController {
      * @return 返回
      */
     @RequestMapping("/alipay/notify")
+    @RateLimit(key = "#out_trade_no", count = 1, interval = "10s", message = "等待上一个回调处理完成")
     @ResponseBody
     public String alipayNotifyUrl(HttpServletRequest request) {
 
@@ -760,20 +788,35 @@ public class NotifyController {
          * 通过订单号查询
          */
         Orders member = ordersService.getOne(new QueryWrapper<Orders>().eq("member", payId));
-        if (member == null) return fiald; // 本地没有这个订单
+        if (member == null) {
+            return "没有找到这个订单"; // 本地没有这个订单
+        }
+
+        if (member.getStatus() > 0) {
+            return success;
+        }
 
         boolean empty = StringUtils.isEmpty(member.getCardsInfo());
-        if (!empty) return success;
+        if (!empty) {
+            return success;
+        }
 
         Products products = productsService.getById(param);
-        if (products == null) return fiald; // 商品没了
+        if (products == null) {
+            return "商品找不到了"; // 商品没了
+        }
 
         Website website = websiteService.getById(1);
         ShopSettings shopSettings = shopSettingsService.getById(1);
 
-        if (products.getShipType() == 0) { // 自动发货的商品
+        Orders orders = new Orders();
+        orders.setId(member.getId());
+        orders.setPayTime(new Date());
+        orders.setPayNo(pay_no);
+        orders.setPrice(new BigDecimal(price));
+        orders.setMoney(new BigDecimal(money));
 
-            StringBuilder stringBuilder = new StringBuilder(); // 通知信息需要的卡密信息
+        if (products.getShipType() == 0) { // 自动发货的商品
 
             /**
              * 卡密信息列表
@@ -781,13 +824,19 @@ public class NotifyController {
              */
             if (products.getSellType() == 0) { // 一次性卡密类型
 
-                List<Cards> card = cardsService.getCard(0, products.getId(), member.getNumber());
-                if (card == null) return fiald; // 空值的话直接返回错误提示
+                List<Cards> cardsList = cardsService.getBaseMapper().selectList(new QueryWrapper<Cards>()
+                        .eq("status", 0)
+                        .eq("product_id", products.getId())
+                        .eq("sell_type", 0)
+                        .orderBy(true, false, "rand()")
+                        .last("LIMIT " + member.getNumber() + ""));
+
+                if (cardsList == null) return fiald; // 空值的话直接返回错误提示
 
                 StringBuilder orderInfo = new StringBuilder(); // 订单关联的卡密信息
-
-                for (Cards cards : card) {
-                    orderInfo.append(cards.getCardInfo()).append(","); // 通过StringBuilder 来拼接卡密信息
+                List<Cards> updateCardsList = new ArrayList<>();
+                for (Cards cards : cardsList) {
+                    orderInfo.append(cards.getCardInfo()).append("\n"); // 通过StringBuilder 来拼接卡密信息
 
                     /**
                      * 设置每条被购买的卡密的售出状态
@@ -799,32 +848,29 @@ public class NotifyController {
                     cards1.setSellNumber(1);
                     cards1.setUpdatedAt(new Date());
 
-                    // 设置售出的卡密
-                    cardsService.updateById(cards1);
-
-                    if (cards.getCardInfo().contains(" ")) {
-                        String[] split = cards.getCardInfo().split(" ");
-                        stringBuilder.append("卡号：").append(split[0]).append(" ").append("卡密：").append(split[1]).append("\n");
-                    } else {
-                        stringBuilder.append("卡密：").append(cards.getCardInfo()).append("\n");
-                    }
+                    updateCardsList.add(cards1);
                 }
 
                 // 去除多余尾部的逗号
                 String result = orderInfo.deleteCharAt(orderInfo.length() - 1).toString();
 
-                Orders orders = new Orders();
-                orders.setId(member.getId());
+                orders.setStatus(1); // 设置已售出
                 orders.setCardsInfo(result);
 
-                // 更新售出卡密
-                ordersService.updateById(orders);
-
+                // 更新售出的订单
+                if (ordersService.updateById(orders)) {
+                    // 设置售出的卡密
+                    cardsService.updateBatchById(updateCardsList);
+                } else {
+                    return fiald;
+                }
             } else if (products.getSellType() == 1) { // 重复销售的卡密
                 StringBuilder orderInfo = new StringBuilder(); // 订单关联的卡密信息
 
-                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 0));
-                if (cards == null) return fiald; // 空值的话直接返回错误提示
+                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 0).eq("sell_type", 1));
+                if (cards == null) {
+                    return fiald; // 空值的话直接返回错误提示
+                }
 
                 /**
                  * 设置每条被购买的卡密的售出状态
@@ -841,34 +887,26 @@ public class NotifyController {
                     cards1.setNumber(cards.getNumber() - member.getNumber());
                 }
 
-                // 设置售出的卡密
-                cardsService.updateById(cards1);
-
-                if (cards.getCardInfo().contains(" ")) {
-                    String[] split = cards.getCardInfo().split(" ");
-                    stringBuilder.append("卡号：").append(split[0]).append(" ").append("卡密：").append(split[1]).append("\n");
-                } else {
-                    stringBuilder.append("卡密：").append(cards.getCardInfo()).append("\n");
-                }
-
                 /**
                  * 看用户购买了多少个卡密
                  * 正常重复的卡密不会购买1个以上
                  * 这里做个以防万一呀（有钱谁不赚）
                  */
                 for (int i = 0; i < member.getNumber(); i++) {
-                    orderInfo.append(cards.getCardInfo()).append(",");
+                    orderInfo.append(cards.getCardInfo()).append("\n");
                 }
 
                 // 去除多余尾部的逗号
                 String result = orderInfo.deleteCharAt(orderInfo.length() - 1).toString();
-
-                Orders orders = new Orders();
-                orders.setId(member.getId());
+                orders.setStatus(1); // 设置已售出
                 orders.setCardsInfo(result);
 
-                // 更新售出卡密
-                ordersService.updateById(orders);
+                // 设置售出的商品
+                if (ordersService.updateById(orders)) {
+                    cardsService.updateById(cards1);
+                } else {
+                    return fiald;
+                }
             }
 
             /**
@@ -897,11 +935,9 @@ public class NotifyController {
                         Map<String, Object> map = new HashMap<>();  // 页面的动态数据
                         map.put("title", website.getWebsiteName());
                         map.put("member", member.getMember());
-                        map.put("money",member.getMoney());
-                        map.put("number",member.getNumber());
-                        map.put("productName",products.getName());
                         map.put("date", DateUtil.getDate());
-                        map.put("info", stringBuilder.toString());
+                        map.put("password", member.getPassword());
+                        map.put("url", website.getWebsiteUrl() + "/search/order/" + member.getMember());
                         try {
                             emailService.sendHtmlEmail(website.getWebsiteName() + "发货提醒", "email/sendShip.html", map, new String[]{member.getEmail()});
                             // emailService.sendTextEmail("卡密购买成功", "您的订单号为：" + member.getMember() + "  您的卡密：" + cards.getCardInfo(), new String[]{member.getEmail()});
@@ -916,6 +952,14 @@ public class NotifyController {
             products1.setId(products.getId());
             products1.setInventory(products.getInventory() - member.getNumber());
             products1.setSales(products.getSales() + member.getNumber());
+
+            orders.setStatus(2); // 手动发货模式 为待处理
+            if (ordersService.updateById(orders)) {
+                // 更新售出
+                productsService.updateById(products1);
+            } else {
+                return fiald;
+            }
 
             /**
              * 微信的 wxpush 通知
@@ -946,26 +990,7 @@ public class NotifyController {
                     }
                 }
             }
-            productsService.updateById(products1);
         }
-
-        /**
-         * 更新订单
-         */
-        Orders orders = new Orders();
-        orders.setId(member.getId());
-
-        if (products.getShipType() == 0) {
-            orders.setStatus(1); // 设置已售出
-        } else {
-            orders.setStatus(2); // 手动发货模式 为待处理
-        }
-
-        orders.setPayTime(new Date());
-        orders.setPayNo(pay_no);
-        orders.setPrice(new BigDecimal(price));
-        orders.setMoney(new BigDecimal(money));
-        ordersService.updateById(orders); // 更新售出
         return success;
     }
 

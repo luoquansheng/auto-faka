@@ -68,16 +68,11 @@ public class SearchOrderController extends BaseApiController {
 
         List<String> cardsList = new ArrayList<>();
         if (!StringUtils.isEmpty(member.getCardsInfo())) {
-            String[] cardsInfo = member.getCardsInfo().split(",");
+            String[] cardsInfo = member.getCardsInfo().split("\n");
             for (String cardInfo : cardsInfo) {
                 StringBuilder cardInfoText = new StringBuilder();
                 if (products.getShipType() == 0) {
-                    if (cardInfo.contains(" ")) {
-                        String[] split = cardInfo.split(" ");
-                        cardInfoText.append("卡号：").append(split[0]).append(" ").append("卡密：").append(split[1]).append("\n");
-                    } else {
-                        cardInfoText.append(cardInfo).append("\n");
-                    }
+                    cardInfoText.append(cardInfo).append("\n");
                     cardsList.add(cardInfoText.toString());
                 } else {
                     cardInfoText.append(cardInfo);

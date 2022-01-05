@@ -10,6 +10,7 @@ import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.CookieRememberMeManager;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.servlet.SimpleCookie;
+import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -63,6 +64,7 @@ public class ShiroConfig {
         filterChainDefinitions.put("/getArticleList", "anon");
         filterChainDefinitions.put("/search", "anon");
         filterChainDefinitions.put("/search/order/**", "anon");
+        filterChainDefinitions.put("/exportCards", "anon");
         filterChainDefinitions.put("/orders/orders/pageAll", "anon");
         filterChainDefinitions.put("/getProductSearchList", "anon");
         filterChainDefinitions.put("/file/enQrcode", "anon");
@@ -132,9 +134,17 @@ public class ShiroConfig {
     public DefaultWebSecurityManager securityManager() {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         securityManager.setRealm(userRealm());
+        securityManager.setSessionManager(sessionManager());
         securityManager.setCacheManager(cacheManager());
         securityManager.setRememberMeManager(cookieRememberMeManager());
         return securityManager;
+    }
+
+    @Bean
+    public DefaultWebSessionManager sessionManager() {
+        DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
+        sessionManager.setSessionIdUrlRewritingEnabled(false);
+        return sessionManager;
     }
 
     /**

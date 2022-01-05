@@ -80,7 +80,7 @@ public class ProductsController extends BaseController {
     @RequestMapping("/page")
     public PageResult<ProductsVo> page(HttpServletRequest request) {
         PageParam<Products> pageParam = new PageParam<>(request);
-        pageParam.addOrderAsc("sort").addOrderDesc("id");
+        pageParam.addOrderAsc("sort");
 
         List<Products> records = productsService.page(pageParam, pageParam.getWrapper()).getRecords();
         List<ProductsVo> productsVoList = records.stream().map((products) -> {
@@ -91,14 +91,14 @@ public class ProductsController extends BaseController {
             productsVo.setClassifyName(classifys.getName());
 
             // 查出商品的卡密数量
-            int count = cardsService.count(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 0));
+            int count = cardsService.count(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 0).eq("sell_type", 0));
             productsVo.setCardMember(count);
 
-            int sellCount = cardsService.count(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 1));
+            int sellCount = cardsService.count(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 1).eq("sell_type", 0));
             productsVo.setSellCardMember(sellCount);
 
             if (products.getSellType() == 1) {
-                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("sell_type",1));
+                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("sell_type", 1));
                 if (!ObjectUtils.isEmpty(cards)) {
                     productsVo.setCardMember(cards.getNumber());
                     productsVo.setSellCardMember(cards.getSellNumber());

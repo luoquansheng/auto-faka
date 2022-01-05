@@ -6,6 +6,7 @@ import cn.zlianpay.settings.entity.Pays;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 
@@ -85,12 +86,15 @@ public class PayUtils extends BaseController {
 	 * @return
 	 */
 	public static String createSign(Map<String, Object> params, String privateKey) {
-
+		params.remove("hash");
 		// 使用HashMap，并使用Arrays.sort排序
 		String[] sortedKeys = params.keySet().toArray(new String[]{});
 		Arrays.sort(sortedKeys);// 排序请求参数
 		StringBuilder builder = new StringBuilder();
 		for (String key : sortedKeys) {
+			if (ObjectUtils.isEmpty(params.get(key))) {
+				continue;
+			}
 			builder.append(key).append("=").append(params.get(key)).append("&");
 		}
 		String result = builder.deleteCharAt(builder.length() - 1).toString();

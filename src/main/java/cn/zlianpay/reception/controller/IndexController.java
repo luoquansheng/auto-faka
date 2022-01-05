@@ -2,8 +2,6 @@ package cn.zlianpay.reception.controller;
 
 import cn.zlianpay.carmi.entity.Cards;
 import cn.zlianpay.carmi.service.CardsService;
-import cn.zlianpay.common.core.annotation.RateLimit;
-import cn.zlianpay.common.core.annotation.SameUrlData;
 import cn.zlianpay.common.core.enmu.Alipay;
 import cn.zlianpay.common.core.enmu.Paypal;
 import cn.zlianpay.common.core.enmu.QQPay;
@@ -59,15 +57,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static cn.zlianpay.dashboard.DashboardController.getOrderList;
-@RateLimit
+
 @Controller
 public class IndexController {
 
@@ -419,7 +420,7 @@ public class IndexController {
         }
 
         if (products.getSellType() == 1) {
-            Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 0));
+            Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 0).eq("sell_type", 1));
             if (!ObjectUtils.isEmpty(cards)) {
                 productsVos.setCardsCount(cards.getNumber().toString());
             } else {
@@ -438,7 +439,7 @@ public class IndexController {
      * @return
      */
     public static Integer getCardListCount(CardsService cardsService, Products products) {
-        List<Cards> cardsList = cardsService.list(new QueryWrapper<Cards>().eq("product_id", products.getId()));
+        List<Cards> cardsList = cardsService.list(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("sell_type", 0));
         Integer count = 0;
         for (Cards cards : cardsList) {
             if (cards.getStatus() == 0) {
@@ -584,16 +585,11 @@ public class IndexController {
 
         List<String> cardsList = new ArrayList<>();
         if (!StringUtils.isEmpty(member.getCardsInfo())) {
-            String[] cardsInfo = member.getCardsInfo().split(",");
+            String[] cardsInfo = member.getCardsInfo().split("\n");
             for (String cardInfo : cardsInfo) {
                 StringBuilder cardInfoText = new StringBuilder();
                 if (products.getShipType() == 0) {
-                    if (cardInfo.contains(" ")) {
-                        String[] split = cardInfo.split(" ");
-                        cardInfoText.append("卡号：").append(split[0]).append(" ").append("卡密：").append(split[1]).append("\n");
-                    } else {
-                        cardInfoText.append(cardInfo).append("\n");
-                    }
+                    cardInfoText.append(cardInfo).append("\n");
                     cardsList.add(cardInfoText.toString());
                 } else {
                     cardInfoText.append(cardInfo);
@@ -656,6 +652,76 @@ public class IndexController {
         return JsonResult.ok("查询成功！").setData(productDTOList);
     }
 
+    /* 拼接字符串
+     * @author
+     * @param
+     * @return
+     */
+    @RequestMapping("/exportCards")
+    public void exportCardsList(HttpServletResponse response, Integer orderId) {
+        Orders orders = ordersService.getById(orderId);
+        Products products = productsService.getById(orders.getProductId());
+
+        StringBuffer text = new StringBuffer();
+        if (!ObjectUtils.isEmpty(orders)) {
+            String[] split = orders.getCardsInfo().split("\n");
+            for (String s : split) {
+                text.append(s).append("\n");
+            }
+        }
+        exportTxt(response, products.getName() + "-" + orders.getMember(), text.toString());
+    }
+
+    /*
+     * 导出txt文件
+     * @author  Panyoujie
+     * @param	response
+     * @param	text 导出的字符串
+     * @return
+     */
+    public void exportTxt(HttpServletResponse response, String fileName, String text){
+        response.setCharacterEncoding("utf-8");
+        // 设置响应的内容类型
+        response.setContentType("text/plain");
+        // 设置文件的名称和格式
+        response.addHeader("Content-Disposition","attachment;filename="
+                + genAttachmentFileName(fileName, "JSON_FOR_UCC_") //设置名称格式，没有这个中文名称无法显示
+                + ".txt");
+        BufferedOutputStream buff = null;
+        ServletOutputStream outStr = null;
+        try {
+            outStr = response.getOutputStream();
+            buff = new BufferedOutputStream(outStr);
+            buff.write(text.getBytes("UTF-8"));
+            buff.flush();
+            buff.close();
+        } catch (Exception e) {
+            //LOGGER.error("导出文件文件出错:{}",e);
+        } finally {try {
+            buff.close();
+            outStr.close();
+        } catch (Exception e) {
+            //LOGGER.error("关闭流对象出错 e:{}",e);
+        }
+        }
+    }
+
+    /**
+     * 原文说这个方法能解决文件中文名乱码问题，但是我实际试了以后中文的文件名依然乱码（文件内容中的中文能正常显示），不知道为什么
+     * 最后是由前端生成的中文名
+     * @param cnName
+     * @param defaultName
+     * @return
+     */
+    public  String genAttachmentFileName(String cnName, String defaultName) {
+        try {
+            cnName = new String(cnName.getBytes("gb2312"), "ISO8859-1");
+        } catch (Exception e) {
+            cnName = defaultName;
+        }
+        return cnName;
+    }
+
     /**
      * 通用获取商品列表
      * 统计商品的卡密使用信息
@@ -667,9 +733,9 @@ public class IndexController {
             ProductDTO productDTO = new ProductDTO();
             BeanUtils.copyProperties(products, productDTO);
 
-            int count = cardsService.count(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 0));
+            int count = cardsService.count(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 0).eq("sell_type", 0));
             productDTO.setCardMember(count);
-            int count2 = cardsService.count(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 1));
+            int count2 = cardsService.count(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 1).eq("sell_type", 0));
             productDTO.setSellCardMember(count2);
             productDTO.setPrice(products.getPrice().toString());
 
@@ -682,7 +748,7 @@ public class IndexController {
             }
 
             if (products.getSellType() == 1) {
-                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("sell_type",1));
+                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("sell_type", 1));
                 if (ObjectUtils.isEmpty(cards)) { // kon
                     productDTO.setCardMember(0);
                     productDTO.setSellCardMember(0);

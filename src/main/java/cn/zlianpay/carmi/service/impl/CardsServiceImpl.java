@@ -7,6 +7,7 @@ import cn.zlianpay.carmi.utils.ExcelPOJO;
 import cn.zlianpay.carmi.utils.ExcelWrite;
 import cn.zlianpay.carmi.vo.CardsDts;
 import cn.zlianpay.common.core.Constants;
+import cn.zlianpay.common.core.utils.CoreUtil;
 import cn.zlianpay.common.core.utils.DateUtil;
 import cn.zlianpay.common.core.web.JsonResult;
 import cn.zlianpay.common.core.web.PageParam;
@@ -52,17 +53,20 @@ public class CardsServiceImpl extends ServiceImpl<CardsMapper, Cards> implements
             List<String> newlist = new ArrayList();
             for (int i = 0; i < cardsInfo.length; ++i) {
                 if (cardsDts.getRepeat() == 0) {
-                    newlist.add(cardsInfo[i]);
+                    newlist.add(CoreUtil.getStringNoBlank(cardsInfo[i]));
                 } else if (cardsDts.getRepeat() == 1 && !newlist.contains(cardsInfo[i])) {
-                    newlist.add(cardsInfo[i]);
+                    newlist.add(CoreUtil.getStringNoBlank(cardsInfo[i]));
                 }
             }
+
+            while (newlist.remove(null));
+            while (newlist.remove(""));
 
             List<Cards> cardsArrayList = new ArrayList<>();
             for (String cardInfo : newlist) {
                 Cards cards = new Cards();
                 cards.setProductId(cardsDts.getProductId());
-                cards.setCardInfo(cardInfo);
+                cards.setCardInfo(CoreUtil.getStringNoBlank(cardInfo));
                 cards.setStatus(0); // 设置未出售
                 cards.setSellType(0);
                 cards.setNumber(1);
@@ -79,14 +83,14 @@ public class CardsServiceImpl extends ServiceImpl<CardsMapper, Cards> implements
             return JsonResult.error("添加卡密失败");
         } else { // 重复销售
 
-            Cards cards1 = this.getOne(new QueryWrapper<Cards>().eq("product_id", cardsDts.getProductId()).eq("status", 0));
+            Cards cards1 = this.getOne(new QueryWrapper<Cards>().eq("product_id", cardsDts.getProductId()).eq("status", 0).eq("sell_type", 1));
             if (!ObjectUtils.isEmpty(cards1)) {
                 return JsonResult.error("当前商品为重复销售类型、已存在一个重复销售的卡密、请勿重复添加，如需修改当前卡密数量请前往卡密管理进行操作。");
             }
 
             Cards cards = new Cards();
             cards.setProductId(cardsDts.getProductId());
-            cards.setCardInfo(cardsDts.getCardInfo());
+            cards.setCardInfo(CoreUtil.getStringNoBlank(cardsDts.getCardInfo()));
             cards.setStatus(0); // 设置未出售
             cards.setSellType(1);
             cards.setNumber(cardsDts.getSellNumber());

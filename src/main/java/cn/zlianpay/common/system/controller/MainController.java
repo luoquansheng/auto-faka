@@ -1,6 +1,5 @@
 package cn.zlianpay.common.system.controller;
 
-import cn.zlianpay.common.core.utils.StringUtil;
 import cn.zlianpay.common.core.web.BaseController;
 import cn.zlianpay.common.core.web.JsonResult;
 import cn.zlianpay.common.system.entity.LoginRecord;
@@ -14,8 +13,6 @@ import cn.zlianpay.website.service.WebsiteService;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.wf.captcha.utils.CaptchaUtil;
-import com.zjiecode.wxpusher.client.WxPusher;
-import com.zjiecode.wxpusher.client.bean.Message;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,20 +163,6 @@ public class MainController extends BaseController implements ErrorController {
             e.printStackTrace();
         }
     }
-    /**
-     * 微信验证码
-     */
-    @RequestMapping("/assets/captchaCode")
-    public void captchaCode() {
-        String code = StringUtil.getRandomNumber(4);
-        Message message = new Message();
-        message.setContent("自助杂货铺" + "登录提醒<br>验证码：<span style='color:red;'>" + code + "</span><br>以上验证密码五分钟内有效，如非本人操作请勿泄露或转发他人。<span><br>");
-        message.setContentType(Message.CONTENT_TYPE_HTML);
-        message.setUid("UID_n9wwF2qYG3UgrE2FBVW7Nx5rfmQC");
-        message.setAppToken("AT_sBVuzPV6yN3gLwMNo4GmXqDnZiZtCzRz");
-        WxPusher.send(message);
-    }
-
 
     /**
      * 主页弹窗页面

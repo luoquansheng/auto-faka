@@ -139,26 +139,6 @@ public class DashboardController extends BaseController {
             total_amount = total_amount.add(new BigDecimal(orders.getMoney().toString())); // 统计今天的交易额
         }
 
-        try {
-            String httpget = doGet("https://shop.zlianpay.cn/ads/getAds", null);
-
-            JSONObject jsonObject = JSONObject.parseObject(httpget);
-            Integer code = (Integer) jsonObject.get("code");
-            if (code == 0) {
-                String data = jsonObject.get("data").toString();
-                Gson gson = new Gson();
-                List<AdsEntity> adsEntityList = gson.fromJson(data, new TypeToken<List<AdsEntity>>() {
-                }.getType());
-                model.addAttribute("adsEntityList", adsEntityList);
-            } else {
-                List<AdsEntity> adsEntityList = new ArrayList<>();
-                model.addAttribute("adsEntityList", adsEntityList);
-            }
-        } catch (Exception e) {
-            List<AdsEntity> adsEntityList = new ArrayList<>();
-            model.addAttribute("adsEntityList", adsEntityList);
-        }
-
         model.addAttribute("mapList", JSON.toJSONString(mapList));
         model.addAttribute("dayList", JSON.toJSONString(dayList));
         model.addAttribute("wxpayList", JSON.toJSONString(wxpayList));
@@ -169,30 +149,6 @@ public class DashboardController extends BaseController {
 
         model.addAttribute("user", getLoginUser());
         return "dashboard/workplace.html";
-    }
-
-    //get请求
-    public static String doGet(String url, String authValue) {
-        String result = null;
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        ResponseHandler<String> responseHandler = new BasicResponseHandler();
-        try {
-            HttpGet httpGet = new HttpGet(url);
-            httpGet.setHeader("Content-type", "application/json");
-            if (!ObjectUtil.isNull(authValue)) {
-                httpGet.setHeader("Authorization", "Bearer " + authValue);
-            }
-            result = httpClient.execute(httpGet, responseHandler);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                httpClient.close();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
-        }
-        return result;
     }
 
     /**
@@ -316,7 +272,6 @@ public class DashboardController extends BaseController {
             } else if (Paypal.getByValue(orders.getPayType())) {
                 paypal++;
             } else if (QQPay.getByValue(orders.getPayType())) {
-                System.out.println("1111");
                 qqpay++;
             }
         }

@@ -428,6 +428,7 @@ public class OrdersController extends BaseController {
                         map.put("date", DateUtil.getDate());
                         map.put("password", orders.getPassword());
                         map.put("url", website.getWebsiteUrl() + "/search/order/" + orders.getMember());
+                        map.put("info", shipInfo);
                         map.put("money",orders.getMoney());
                         map.put("number",orders.getNumber());
                         map.put("productName",products.getName());
@@ -485,6 +486,7 @@ public class OrdersController extends BaseController {
         orders.setMoney(member.getMoney());
 
         if (products.getShipType() == 0) { // 自动发货的商品
+            StringBuilder stringBuilder = new StringBuilder(); // 通知信息需要的卡密信息
             if (products.getSellType() == 0) { // 一次性卡密类型
                 /**
                  * 卡密信息列表
@@ -517,6 +519,12 @@ public class OrdersController extends BaseController {
                     cards1.setUpdatedAt(new Date());
 
                     updateCardsList.add(cards1);
+                    if (cards.getCardInfo().contains(" ")) {
+                        String[] split = cards.getCardInfo().split(" ");
+                        stringBuilder.append("卡号：").append(split[0]).append(" ").append("卡密：").append(split[1]).append("\n");
+                    } else {
+                        stringBuilder.append("卡密：").append(cards.getCardInfo()).append("\n");
+                    }
                 }
 
                 // 去除多余尾部的逗号
@@ -557,6 +565,13 @@ public class OrdersController extends BaseController {
                 } else {
                     cards1.setSellNumber(cards.getSellNumber() + member.getNumber());
                     cards1.setNumber(cards.getNumber() - member.getNumber());
+                }
+
+                if (cards.getCardInfo().contains(" ")) {
+                    String[] split = cards.getCardInfo().split(" ");
+                    stringBuilder.append("卡号：").append(split[0]).append(" ").append("卡密：").append(split[1]).append("\n");
+                } else {
+                    stringBuilder.append("卡密：").append(cards.getCardInfo()).append("\n");
                 }
 
                 /**
@@ -608,6 +623,7 @@ public class OrdersController extends BaseController {
                         map.put("date", DateUtil.getDate());
                         map.put("password", member.getPassword());
                         map.put("url", website.getWebsiteUrl() + "/search/order/" + member.getMember());
+                        map.put("info", stringBuilder.toString());
                         map.put("money",member.getMoney());
                         map.put("number",member.getNumber());
                         map.put("productName",products.getName());

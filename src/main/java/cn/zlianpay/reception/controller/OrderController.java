@@ -477,7 +477,7 @@ public class OrderController extends BaseController {
         orders.setMoney(new BigDecimal(money));
 
         if (products.getShipType() == 0) { // 自动发货的商品
-
+            StringBuilder stringBuilder = new StringBuilder(); // 通知信息需要的卡密信息
             /**
              * 卡密信息列表
              * 通过商品购买数量来获取对应商品的卡密数量
@@ -509,6 +509,13 @@ public class OrderController extends BaseController {
                     cards1.setUpdatedAt(new Date());
 
                     updateCardsList.add(cards1);
+
+                    if (cards.getCardInfo().contains(" ")) {
+                        String[] split = cards.getCardInfo().split(" ");
+                        stringBuilder.append("卡号：").append(split[0]).append(" ").append("卡密：").append(split[1]).append("\n<br/>");
+                    } else {
+                        stringBuilder.append("卡密：").append(cards.getCardInfo()).append("\n<br/>");
+                    }
                 }
 
                 // 去除多余尾部的逗号
@@ -563,6 +570,12 @@ public class OrderController extends BaseController {
 
                 // 设置售出的商品
                 if (ordersService.updateById(orders)) {
+                    if (cards.getCardInfo().contains(" ")) {
+                        String[] split = cards.getCardInfo().split(" ");
+                        stringBuilder.append("卡号：").append(split[0]).append(" ").append("卡密：").append(split[1]).append("\n<br/>");
+                    } else {
+                        stringBuilder.append("卡密：").append(cards.getCardInfo()).append("\n<br/>");
+                    }
                     cardsService.updateById(cards1);
                 } else {
                     return false;
@@ -598,6 +611,7 @@ public class OrderController extends BaseController {
                         map.put("date", DateUtil.getDate());
                         map.put("password", member.getPassword());
                         map.put("url", website.getWebsiteUrl() + "/search/order/" + member.getMember());
+                        map.put("info", stringBuilder.toString());
                         map.put("money",member.getMoney());
                         map.put("number",member.getNumber());
                         map.put("productName",products.getName());

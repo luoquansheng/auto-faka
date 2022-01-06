@@ -21,10 +21,14 @@
 <div class="layui-container body-card">
     <div class="layui-row layui-col-space15">
         <!-- 左 -->
-        <div class="layui-col-xs12 layui-col-sm6 layui-col-md6">
+        <div class="layui-col-xs12 layui-col-sm12 layui-col-md12">
             <div class="layui-card order-show">
 
                 <div class="weui-cells">
+                    <div class="weui-cell">
+                        <div class="weui-cell__bd">商品名称</div>
+                        <div class="weui-cell__ft">${orders.productName}</div>
+                    </div>
                     <div class="weui-cell">
                         <div class="weui-cell__bd">联系方式</div>
                         <div class="weui-cell__ft">${orders.email!orders.contact}</div>
@@ -62,7 +66,7 @@
             </div>
         </div>
         <!-- 左 -->
-        <div class="layui-col-xs12 layui-col-sm6 layui-col-md6">
+        <div class="layui-col-xs12 layui-col-sm12 layui-col-md12">
             <div class="layui-card order-show">
                 <:if test="${orders.status == 0}">
                     <div class="layui-text">
@@ -81,11 +85,11 @@
                 <:if test="${orders.status == 1 || orders.status == 3}">
                     <div class="layui-text" style="font-size: 18px; height: auto">
                         <div class="user-info-list-item">
-                            <textarea id="card-txt" placeholder="查看卡密信息" class="layui-textarea" style="height: 237px;"><:for items="${cardsList}" var="item">${item!}</:for></textarea>
+                            <textarea id="card-txt" placeholder="查看卡密信息" class="layui-textarea" style="height: 237px;transition: none" readonly><:for items="${cardsList}" var="item">${item!}</:for></textarea>
                         </div>
                     </div>
                     <div class="reset">
-                        <a id="card-copy1" href="#" data-clipboard-target="#card-txt"
+                        <a id="card-copy1" href="javascript:void(0);" data-clipboard-target="#card-txt"
                            class="reset-left layui-btn">复制卡密</a>
                         <script type="text/javascript"> new ClipboardJS('#card-copy1'); </script>
                     </div>
@@ -156,6 +160,9 @@
                 '</div>';
             return html;
         }
+
+        var txt = $('#card-txt').val()
+        $('#card-txt').val(txt.replace(/<br\/>/g, '\n'));
 
     })
 </script>

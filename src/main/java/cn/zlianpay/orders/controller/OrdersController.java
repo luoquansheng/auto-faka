@@ -388,7 +388,7 @@ public class OrdersController extends BaseController {
     @ResponseBody
     @RequestMapping("/sendShip")
     public JsonResult sendShip(Integer id, String shipInfo) throws MessagingException, IOException {
-
+        String shipData = shipInfo.replaceAll("\n","<br/>");
         /**
          * 查出订单
          */
@@ -396,7 +396,7 @@ public class OrdersController extends BaseController {
         Products products = productsService.getById(orders.getProductId()); // 查出对应的商品
 
         Cards cards = new Cards();
-        cards.setCardInfo(shipInfo);
+        cards.setCardInfo(shipData);
         cards.setCreatedAt(new Date());
         cards.setProductId(products.getId());
         cards.setStatus(1); // 默认已使用
@@ -407,7 +407,7 @@ public class OrdersController extends BaseController {
         Orders orders1 = new Orders();
         orders1.setId(orders.getId());
         orders1.setStatus(3);
-        orders1.setCardsInfo(shipInfo);
+        orders1.setCardsInfo(shipData);
 
         Website website = websiteService.getById(1);
         ShopSettings shopSettings = shopSettingsService.getById(1);
@@ -428,7 +428,7 @@ public class OrdersController extends BaseController {
                         map.put("date", DateUtil.getDate());
                         map.put("password", orders.getPassword());
                         map.put("url", website.getWebsiteUrl() + "/search/order/" + orders.getMember());
-                        map.put("info", shipInfo);
+                        map.put("info", shipData);
                         map.put("money",orders.getMoney());
                         map.put("number",orders.getNumber());
                         map.put("productName",products.getName());
@@ -521,9 +521,9 @@ public class OrdersController extends BaseController {
                     updateCardsList.add(cards1);
                     if (cards.getCardInfo().contains(" ")) {
                         String[] split = cards.getCardInfo().split(" ");
-                        stringBuilder.append("卡号：").append(split[0]).append(" ").append("卡密：").append(split[1]).append("\n");
+                        stringBuilder.append("卡号：").append(split[0]).append(" ").append("卡密：").append(split[1]).append("\n<br/>");
                     } else {
-                        stringBuilder.append("卡密：").append(cards.getCardInfo()).append("\n");
+                        stringBuilder.append("卡密：").append(cards.getCardInfo()).append("\n<br/>");
                     }
                 }
 
@@ -569,9 +569,9 @@ public class OrdersController extends BaseController {
 
                 if (cards.getCardInfo().contains(" ")) {
                     String[] split = cards.getCardInfo().split(" ");
-                    stringBuilder.append("卡号：").append(split[0]).append(" ").append("卡密：").append(split[1]).append("\n");
+                    stringBuilder.append("卡号：").append(split[0]).append(" ").append("卡密：").append(split[1]).append("\n<br/>");
                 } else {
-                    stringBuilder.append("卡密：").append(cards.getCardInfo()).append("\n");
+                    stringBuilder.append("卡密：").append(cards.getCardInfo()).append("\n<br/>");
                 }
 
                 /**

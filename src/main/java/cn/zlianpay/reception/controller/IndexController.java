@@ -600,6 +600,7 @@ public class IndexController {
 
         OrdersVo ordersVo = new OrdersVo();
         BeanUtils.copyProperties(member, ordersVo);
+        ordersVo.setProductName(products.getName());
         if (member.getPayTime() != null) {
             ordersVo.setPayTime(DateUtil.getSubDateMiao(member.getPayTime()));
         } else {

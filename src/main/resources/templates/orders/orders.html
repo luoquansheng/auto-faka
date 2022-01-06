@@ -463,12 +463,16 @@
 
         /* 显示卡密信息弹窗 */
         function showEditModel(mData) {
-            var txt = mData.cardInfo[0];
+            console.log(mData.cardInfo);
+            var text = [];
+            for (let i = 0; i < mData.cardInfo.length; i++) {
+                text.push(mData.cardInfo[i].replace(/<br\/>/g, '\n\n'))
+            }
             admin.open({
                 type: 1,
                 title: '卡密信息',
                 content: $('#cardsInfoDialog').html(),
-                data: txt.replace(/<br\/>/g, '\n'),
+                data: text.join('\n'),
                 tpl: true
             });
         }

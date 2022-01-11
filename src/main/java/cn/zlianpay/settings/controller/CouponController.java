@@ -9,6 +9,7 @@ import cn.zlianpay.products.service.ProductsService;
 import cn.zlianpay.settings.entity.Coupon;
 import cn.zlianpay.settings.service.CouponService;
 import cn.zlianpay.settings.vo.CouponVo;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.BeanUtils;
@@ -50,6 +51,22 @@ public class CouponController extends BaseController {
         List<Classifys> classifyList = classifysService.list();
         model.addAttribute("classifyList", classifyList);
         return "settings/coupon_add.html";
+    }
+
+    @RequiresPermissions("settings:coupon:view")
+    @RequestMapping("/edit/{couponId}")
+    public String view_edit(Model model, @PathVariable("couponId") Integer couponId) {
+        //List<Classifys> classifysList = classifysService.listAll(null);
+        //model.addAttribute("classifyList", classifysList);
+
+        Coupon coupon = couponService.getById(couponId);
+        model.addAttribute("coupons", JSON.toJSONString(coupon));
+        model.addAttribute("couponId", couponId);
+        String productName = productsService.getById(coupon.getProductId()).getName();
+        String classifyName = classifysService.getById(coupon.getClassifysId()).getName();
+        model.addAttribute("productId",productName);
+        model.addAttribute("classifysId",classifyName);
+        return "settings/coupon_edit.html";
     }
 
     /**

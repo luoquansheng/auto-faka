@@ -11,6 +11,22 @@
             优惠券管理
         </div>
         <div class="layui-card-body">
+            <!-- 表格工具栏 -->
+            <form class="layui-form toolbar">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">优惠券:</label>
+                        <div class="layui-input-inline">
+                            <input name="coupon" class="layui-input" placeholder="输入优惠券"/>
+                        </div>
+                    </div>
+                    <div class="layui-inline">&emsp;
+                        <button class="layui-btn icon-btn" lay-filter="couponTbSearch" lay-submit>
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </button>
+                    </div>
+                </div>
+            </form>
             <!-- 数据表格 -->
             <table id="couponTable" lay-filter="couponTable"></table>
         </div>
@@ -18,8 +34,8 @@
 </div>
 <!-- 表格操作列 -->
 <script type="text/html" id="couponTbBar">
-    <a class="layui-btn layui-btn-danger layui-btn-xs"
-       data-dropdown="#couponTbDelDrop{{d.LAY_INDEX}}" no-shade="true">删除</a>
+    <a ew-href="${ctxPath}/settings/coupon/edit/{{d.id}}" class="layui-btn layui-btn-primary layui-btn-xs" ew-title="编辑优惠券">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" data-dropdown="#couponTbDelDrop{{d.LAY_INDEX}}" no-shade="true">删除</a>
     <div class="dropdown-menu-nav dropdown-popconfirm dropdown-top-right layui-hide"
          id="couponTbDelDrop{{d.LAY_INDEX}}"
          style="max-width: 200px;white-space: normal;min-width: auto;margin-left: 10px;">

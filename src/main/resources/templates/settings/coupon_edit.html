@@ -14,19 +14,22 @@
         <div class="layui-card-body">
             <!-- 表单开始 -->
             <form class="layui-form" id="formBasForm" lay-filter="formBasForm" style="margin-top: 10px">
+                <input name="id" type="hidden" />
 
                 <!-- 商品选择 -->
                 <div class="layui-form-item" id="selectByitem">
                     <label class="layui-form-label layui-form-required">选择商品:</label>
                     <div class="layui-input-inline" id="selectClassify">
-                        <select name="classifysId" id="classifysid" lay-verType="tips" lay-filter="classifysid" lay-verify="required">
-                            <option value="">请选择分类</option>
+                        <select id="classifysid" lay-verType="tips" lay-filter="classifysid" disabled>
+                            <option value="">${classifyName}</option>
                         </select>
+                        <input name="classifysId" type="hidden" />
                     </div>
                     <div class="layui-input-inline" id="selectGoods">
-                        <select name="productId" id="productId" lay-verify="required" lay-filter="productId">
-                            <option value="">请选择商品</option>
+                        <select id="productId" lay-filter="productId" disabled>
+                            <option value="">${productName}</option>
                         </select>
+                        <input name="productId" type="hidden" />
                     </div>
                 </div>
 
@@ -87,7 +90,7 @@
                 <!-- 提交 -->
                 <div class="layui-form-item">
                     <div class="layui-input-block">
-                        <button class="layui-btn" lay-filter="productsEditSubmit" lay-submit> 保存优惠</button>
+                        <button class="layui-btn" lay-filter="couponEditSubmit" lay-submit> 保存优惠</button>
                     </div>
                 </div>
             </form>
@@ -142,10 +145,17 @@
                     '<input name="discountVal" type="number" placeholder="请输入满减" class="layui-input" lay-verify="required" required/>' +
                     '<div class="layui-word-aux">请输入金额,金额在0.1-20000元之间</div>'
                 );
-            } else if (value == 1) {
+            }
+            if (value == 1) {
                 $("#discountVal").html(
                     '<input name="discountVal" type="number" placeholder="请输入折扣" class="layui-input" lay-verify="required" required/>' +
                     '<div class="layui-word-aux">请输入折扣,折扣为1-10之间的数字</div>'
+                );
+            }
+            if (value == 2) {
+                $("#discountVal").html(
+                    '<input name="discountVal" type="number" placeholder="请输入特定价格" class="layui-input" lay-verify="required" required/>' +
+                    '<div class="layui-word-aux">请输入金额,金额在0.1-20000元之间</div>'
                 );
             }
         });
@@ -211,6 +221,21 @@
             }
         });
 
+        /* 表单提交 */
+        form.on('submit(couponEditSubmit)', function (data) {
+            var loadIndex = layer.load(2);
+            $.post('/settings/coupon/update', data.field, function (res) {
+                layer.close(loadIndex);
+                if (0 === res.code) {
+                    layer.msg(res.msg, {icon: 1, time: 1000}, function () {
+                        location.reload();
+                    });
+                } else {
+                    layer.msg(res.msg, {icon: 2, anim: 6});
+                }
+            });
+            return false;
+        });
     });
 </script>
 </body>

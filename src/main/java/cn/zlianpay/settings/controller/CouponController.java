@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -64,8 +65,8 @@ public class CouponController extends BaseController {
         model.addAttribute("couponId", couponId);
         String productName = productsService.getById(coupon.getProductId()).getName();
         String classifyName = classifysService.getById(coupon.getClassifysId()).getName();
-        model.addAttribute("productId",productName);
-        model.addAttribute("classifysId",classifyName);
+        model.addAttribute("productName",productName);
+        model.addAttribute("classifyName",classifyName);
         return "settings/coupon_edit.html";
     }
 
@@ -142,6 +143,9 @@ public class CouponController extends BaseController {
     @ResponseBody
     @RequestMapping("/update")
     public JsonResult update(Coupon coupon) {
+        coupon.setType((coupon.getCountAll()>1)?1:0);
+        coupon.setUpdateTime(new Date());
+        coupon.setRemark((coupon.getType()==0)?"一次使用":"重复使用");
         if (couponService.updateById(coupon)) {
             return JsonResult.ok("修改成功");
         }

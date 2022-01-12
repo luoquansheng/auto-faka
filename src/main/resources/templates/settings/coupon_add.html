@@ -145,10 +145,17 @@
                     '<input name="discountVal" type="number" placeholder="请输入满减" class="layui-input" lay-verify="required" required/>' +
                     '<div class="layui-word-aux">请输入金额,金额在0.1-20000元之间</div>'
                 );
-            } else if (value == 1) {
+            }
+            if (value == 1) {
                 $("#discountVal").html(
                     '<input name="discountVal" type="number" placeholder="请输入折扣" class="layui-input" lay-verify="required" required/>' +
                     '<div class="layui-word-aux">请输入折扣,折扣为1-10之间的数字</div>'
+                );
+            }
+            if (value == 2) {
+                $("#discountVal").html(
+                    '<input name="discountVal" type="number" placeholder="请输入特定价格" class="layui-input" lay-verify="required" required/>' +
+                    '<div class="layui-word-aux">请输入金额,金额在0.1-20000元之间</div>'
                 );
             }
         });

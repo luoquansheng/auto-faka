@@ -98,10 +98,12 @@ public class ProductsController extends BaseController {
             productsVo.setSellCardMember(sellCount);
 
             if (products.getSellType() == 1) {
-                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("sell_type", 1));
-                if (!ObjectUtils.isEmpty(cards)) {
-                    productsVo.setCardMember(cards.getNumber());
-                    productsVo.setSellCardMember(cards.getSellNumber());
+                List<Cards> cards = cardsService.getCard(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("sell_type", 1));
+                if (cards.size() > 0 && !ObjectUtils.isEmpty(cards)) {
+                    int cardMember = cards.stream().mapToInt(Cards::getNumber).sum();
+                    int sellCardMember = cards.stream().mapToInt(Cards::getSellNumber).sum();
+                    productsVo.setCardMember(cardMember);
+                    productsVo.setSellCardMember(sellCardMember);
                 } else {
                     productsVo.setCardMember(0);
                     productsVo.setSellCardMember(0);

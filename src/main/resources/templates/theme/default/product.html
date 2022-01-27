@@ -469,6 +469,7 @@
         var form = layui.form;
         var notice = layui.notice;
         var product1 = {};
+        var productsInfo = JSON.parse(JSON.stringify(${productsInfo!}));
 
         var A = document.getElementById("item-phone"), M = document.getElementById("phone-code");
         A.addEventListener("mouseenter", function () {
@@ -727,6 +728,30 @@
                 var price = orderNumber * product1.price;
                 $("#goodsprice2").text(price.toFixed(2));
             }
+        }
+
+        if (productsInfo.isWindow == 1) {     //
+            //示范一个公告层
+            layer.open({
+                type: 1,
+                title: '商家提示',
+                closeBtn: false,
+                area: '300px;',
+                shade: 0.4,
+                id: 'LAY_layuipro',
+                btn: ['我同意，并会按照提示操作'],
+                btnAlign: 'c',
+                moveType: 1,
+                content: '<div style="padding: 20px; font-size: 16px; font-family: Content-font, Roboto, sans-serif; font-weight: 400;">' + productsInfo.windowText + '</div>',
+                success: function (layero) {
+                    /*var btn = layero.find('.layui-layer-btn');
+                    btn.click(function () {
+                        /!*var date = new Date();
+                        date.setTime(date.getTime() + (5 * 1000));*!/
+                        $.cookie('isWindow', 'yes', {expires: 1});
+                    })*/
+                }
+            });
         }
     });
 </script>

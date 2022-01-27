@@ -193,6 +193,20 @@
                         <input type="radio" name="status" value="0" title="下架">
                     </div>
                 </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label layui-form-required">商品弹窗:</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="isWindow" lay-filter="isWindow" value="1" title="开启">
+                        <input type="radio" name="isWindow" lay-filter="isWindow" value="0" title="关闭" checked>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label layui-form-required">弹窗内容:</label>
+                    <div class="layui-input-block">
+                        <textarea id="windowText"></textarea>
+                    </div>
+                </div>
                 <div class="layui-form-item">
                     <div class="layui-input-block">
                         <button class="layui-btn" lay-filter="productsEditSubmit" lay-submit> 保存商品</button>
@@ -239,6 +253,7 @@
         /* 表单提交 */
         form.on('submit(productsEditSubmit)', function (data) {
             data.field.pdInfo = tinymce.get('pdInfoEditor').getContent();
+            data.field.windowText = tinymce.get('windowText').getContent();
             var loadIndex = layer.load(2);
             $.post('/products/products/save', data.field, function (res) {
                 layer.close(loadIndex);
@@ -269,6 +284,20 @@
             }
         });
 
+        /* 渲染富文本编辑器 */
+        tinymce.init({
+            selector: '#windowText',
+            height: 500,
+            branding: false,
+            language: 'zh_CN',
+            plugins: 'code print preview fullscreen paste searchreplace save autosave link autolink image imagetools media table codesample lists advlist hr charmap emoticons anchor directionality pagebreak quickbars nonbreaking visualblocks visualchars wordcount',
+            toolbar: 'fullscreen preview code | undo redo | forecolor backcolor | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | formatselect fontselect fontsizeselect | link image media emoticons charmap anchor pagebreak codesample | ltr rtl',
+            images_upload_url: '${ctxPath}/file/upload',
+            file_picker_types: 'media',
+            file_picker_callback: function (callback, value, meta) {
+                layer.msg('演示环境不允许上传', {anim: 6});
+            },
+        });
         $('#test1').click(function (res) {
             fileChoose.open({
                 fileUrl: '${ctxPath}/file',

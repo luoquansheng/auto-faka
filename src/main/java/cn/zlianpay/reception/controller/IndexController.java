@@ -348,6 +348,7 @@ public class IndexController {
             model.addAttribute("paysList", paysVoList);
         }
         model.addAttribute("products", products);
+        model.addAttribute("productsInfo", JSON.toJSONString(products));
         model.addAttribute("classifyName", classifys.getName());
 
         if (products.getIsWholesale() == 1) {

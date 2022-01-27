@@ -135,4 +135,14 @@ public class Products implements Serializable {
      * 售卡类型
      */
     private Integer sellType;
+
+    /**
+     * 是否开启弹窗
+     */
+    private Integer isWindow;
+
+    /**
+     * 弹窗内容
+     */
+    private String windowText;
 }

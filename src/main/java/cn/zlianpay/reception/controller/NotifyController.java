@@ -876,7 +876,12 @@ public class NotifyController {
             if (products.getSellType() == 1) { // 重复销售的卡密
                 StringBuilder orderInfo = new StringBuilder(); // 订单关联的卡密信息
 
-                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 0).eq("sell_type", 1));
+                Cards cards = cardsService.getOne(new QueryWrapper<Cards>()
+                        .eq("product_id", products.getId())
+                        .eq("status", 0)
+                        .eq("sell_type", 1)
+                        .orderBy(true, false, "rand()")
+                        .last("LIMIT " + member.getNumber() + ""));
                 if (cards == null) {
                     return fiald; // 空值的话直接返回错误提示
                 }

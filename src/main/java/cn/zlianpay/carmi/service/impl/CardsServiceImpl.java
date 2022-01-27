@@ -83,7 +83,11 @@ public class CardsServiceImpl extends ServiceImpl<CardsMapper, Cards> implements
             return JsonResult.error("添加卡密失败");
         } else { // 重复销售
 
-            Cards cards1 = this.getOne(new QueryWrapper<Cards>().eq("product_id", cardsDts.getProductId()).eq("status", 0).eq("sell_type", 1));
+            Cards cards1 = this.getOne(new QueryWrapper<Cards>()
+                    .eq("product_id", cardsDts.getProductId())
+                    .eq("status", 0)
+                    .eq("sell_type", 1)
+                    .eq("card_info",CoreUtil.getStringNoBlank(cardsDts.getCardInfo())));
             if (!ObjectUtils.isEmpty(cards1)) {
                 return JsonResult.error("当前商品为重复销售类型、已存在一个重复销售的卡密、请勿重复添加，如需修改当前卡密数量请前往卡密管理进行操作。");
             }
@@ -136,4 +140,8 @@ public class CardsServiceImpl extends ServiceImpl<CardsMapper, Cards> implements
         return toExcelByPOJO;
     }
 
+    @Override
+    public List<Cards> getCard(QueryWrapper<Cards> eq) {
+        return baseMapper.selectList(eq);
+    }
 }

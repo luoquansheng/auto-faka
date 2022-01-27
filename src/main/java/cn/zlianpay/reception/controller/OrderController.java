@@ -164,7 +164,11 @@ public class OrderController extends BaseController {
         if (products.getShipType() == 0) { // 自动发货模式
             int count = 0;
             if (products.getSellType() == 1) {
-                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 0).eq("sell_type", 1));
+                Cards cards = cardsService.getOne(new QueryWrapper<Cards>()
+                        .eq("product_id", products.getId()).eq("status", 0)
+                        .eq("sell_type", 1)
+                        .orderBy(true, false, "rand()")
+                        .last("LIMIT 1"));
                 if (ObjectUtils.isEmpty(cards)) {
                     count = 0;
                 } else {
@@ -534,7 +538,12 @@ public class OrderController extends BaseController {
             } else if (products.getSellType() == 1) { // 重复销售的卡密
                 StringBuilder orderInfo = new StringBuilder(); // 订单关联的卡密信息
 
-                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 0).eq("sell_type", 1));
+                Cards cards = cardsService.getOne(new QueryWrapper<Cards>()
+                        .eq("product_id", products.getId())
+                        .eq("status", 0)
+                        .eq("sell_type", 1)
+                        .orderBy(true, false, "rand()")
+                        .last("LIMIT 1"));
                 if (cards == null) {
                     return false; // 空值的话直接返回错误提示
                 }

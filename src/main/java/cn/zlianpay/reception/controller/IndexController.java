@@ -420,9 +420,12 @@ public class IndexController {
         }
 
         if (products.getSellType() == 1) {
-            Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("status", 0).eq("sell_type", 1));
-            if (!ObjectUtils.isEmpty(cards)) {
-                productsVos.setCardsCount(cards.getNumber().toString());
+            List<Cards> cards = cardsService.getCard(new QueryWrapper<Cards>()
+                    .eq("product_id", products.getId()).eq("status", 0)
+                    .eq("sell_type", 1));
+            if (cards.size() > 0 && !ObjectUtils.isEmpty(cards)) {
+                int cardsCount = cards.stream().mapToInt(Cards::getNumber).sum();
+                productsVos.setCardsCount(cardsCount+"");
             } else {
                 productsVos.setCardsCount("0");
             }
@@ -749,13 +752,17 @@ public class IndexController {
             }
 
             if (products.getSellType() == 1) {
-                Cards cards = cardsService.getOne(new QueryWrapper<Cards>().eq("product_id", products.getId()).eq("sell_type", 1));
-                if (ObjectUtils.isEmpty(cards)) { // kon
+                List<Cards> cards = cardsService.getCard(new QueryWrapper<Cards>()
+                        .eq("product_id", products.getId())
+                        .eq("sell_type", 1));
+                if (cards.size() == 0 && ObjectUtils.isEmpty(cards)) { // kon
                     productDTO.setCardMember(0);
                     productDTO.setSellCardMember(0);
                 } else {
-                    productDTO.setCardMember(cards.getNumber());
-                    productDTO.setSellCardMember(cards.getSellNumber());
+                    int cardMember = cards.stream().mapToInt(Cards::getNumber).sum();
+                    int sellCardMember = cards.stream().mapToInt(Cards::getSellNumber).sum();
+                    productDTO.setCardMember(cardMember);
+                    productDTO.setSellCardMember(sellCardMember);
                 }
             }
 

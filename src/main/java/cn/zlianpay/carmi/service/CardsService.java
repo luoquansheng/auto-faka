@@ -3,6 +3,7 @@ package cn.zlianpay.carmi.service;
 import cn.zlianpay.common.core.web.JsonResult;
 import cn.zlianpay.common.core.web.PageParam;
 import cn.zlianpay.common.core.web.PageResult;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import cn.zlianpay.carmi.entity.Cards;
 import cn.zlianpay.carmi.vo.CardsDts;
@@ -31,4 +32,6 @@ public interface CardsService extends IService<Cards> {
     List<Cards> getCard(Integer status, Integer productId, Integer number);
 
     String export(Integer productId, Integer status);
+
+    List<Cards> getCard(QueryWrapper<Cards> eq);
 }
